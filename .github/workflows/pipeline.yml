@@ -4,10 +4,9 @@
 # built parquet ride the Actions cache between runs, so a normal week
 # only fetches the new/changed monthly zips.
 #
-# Interim data path: site data files are bundled into the Pages deploy.
-# Once R2 is enabled on the Cloudflare account, switch to uploading
-# data/site/* to the bucket (see the commented step) and set
-# PUBLIC_DATA_BASE for the site build.
+# Data goes to R2 (public r2.dev URL, CORS-restricted to the site
+# origins); the site fetches it at runtime, so the Pages deploy only
+# changes when site code changes.
 name: pipeline
 
 on:
@@ -58,26 +57,26 @@ jobs:
       - name: Score facilities, emit site artifacts
         run: uv run methane build --data "$PETRINEX_OUT" --out data/site
 
-      # - name: Publish data artifacts to R2   (enable once R2 is on)
-      #   env:
-      #     CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      #   run: |
-      #     for f in scores.parquet facilities.geojson summary.json; do
-      #       npx wrangler r2 object put "methane-outliers/site-data/$f" \
-      #         --file "data/site/$f" --remote
-      #     done
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
 
-      - name: Build site (data bundled, interim)
+      - name: Publish data artifacts to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for f in scores.parquet facilities.geojson summary.json; do
+            npx wrangler r2 object put "methane-outliers/site-data/$f" \
+              --file "data/site/$f" --remote
+          done
+
+      - name: Build site
         working-directory: site
+        env:
+          PUBLIC_DATA_BASE: https://pub-45d719103a704b39a9b18888c4d12fad.r2.dev/site-data
         run: |
           npm ci
-          mkdir -p public/data
-          cp ../data/site/facilities.geojson ../data/site/summary.json public/data/
           npm run build
 
       - name: Deploy to Cloudflare Pages

@@ -29,6 +29,8 @@ const map = new maplibregl.Map({
   attributionControl: { compact: true },
 });
 map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
+map.on("error", (e) => console.error("[map]", e.error ?? e));
+window._map = map;
 
 const colorExpr = (m) => [
   "step", ["get", `${m}_pct`],

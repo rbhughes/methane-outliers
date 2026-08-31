@@ -1,0 +1,26 @@
+[project]
+name = "methane-outliers"
+version = "0.1.0"
+description = "Peer-expectation outlier scores for vented, flared and fuel gas at Alberta facilities"
+requires-python = ">=3.12"
+license = {file = "LICENSE"}
+dependencies = [
+    "duckdb>=1.0",
+    "petrinex-etl",
+]
+
+[project.scripts]
+methane = "methane_outliers.cli:main"
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[tool.uv.sources]
+petrinex-etl = { git = "https://github.com/rbhughes/petrinex-etl" }
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

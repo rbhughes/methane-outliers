@@ -6,3 +6,4 @@ site/node_modules/
 site/dist/
 site/public/data/
 site/.astro/
+petrinex-data/

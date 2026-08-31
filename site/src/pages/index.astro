@@ -1,0 +1,256 @@
+---
+// Data files are published separately from the site (R2 in production,
+// /data locally), so a weekly data refresh never rebuilds the site.
+const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alberta Methane Outliers</title>
+    <meta
+      name="description"
+      content="Peer-expectation outlier scores for vented, flared and fuel gas at Alberta oil and gas facilities, from Petrinex public data."
+    />
+  </head>
+  <body data-data-base={DATA_BASE}>
+    <header class="masthead">
+      <div>
+        <h1>Alberta Methane Outliers</h1>
+        <p class="tagline">
+          Which facilities vent, flare and burn more gas than their peers?
+          Peer-expectation scores from
+          <a href="https://www.petrinex.ca">Petrinex</a> public data.
+        </p>
+      </div>
+      <span class="window-badge" id="window-badge" hidden></span>
+    </header>
+
+    <section class="tiles" id="tiles" aria-label="Provincial totals"></section>
+
+    <div class="controls">
+      <div class="metric-toggle" role="tablist" aria-label="Metric">
+        <button role="tab" data-metric="vent" aria-selected="true">Vented</button>
+        <button role="tab" data-metric="flare" aria-selected="false">Flared</button>
+        <button role="tab" data-metric="fuel" aria-selected="false">Fuel</button>
+      </div>
+      <div class="legend" aria-hidden="true">
+        <span class="legend-title">Peer percentile</span>
+        <span class="swatch" style="--c: var(--seq-150)"></span><span>&le;50</span>
+        <span class="swatch" style="--c: var(--seq-300)"></span><span>75</span>
+        <span class="swatch" style="--c: var(--seq-450)"></span><span>90</span>
+        <span class="swatch" style="--c: var(--seq-550)"></span><span>95</span>
+        <span class="swatch ring" style="--c: var(--seq-700)"></span><span>outlier</span>
+      </div>
+    </div>
+
+    <main class="layout">
+      <div id="map" role="application" aria-label="Facility map"></div>
+      <aside class="panel">
+        <h2 id="panel-title">Top outliers</h2>
+        <p class="panel-note">
+          &ge;95th percentile of their peer group and &ge;50 e3m&sup3; over the
+          window. Click a row to locate it.
+        </p>
+        <table id="outliers">
+          <thead>
+            <tr><th scope="col">Facility</th><th scope="col">Operator</th>
+              <th scope="col" class="num">e3m&sup3;</th>
+              <th scope="col" class="num">&times; peer</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </aside>
+    </main>
+
+    <footer>
+      <p id="attribution">
+        Contains information licensed from Petrinex; data &copy; Government of
+        Alberta. Non-commercial demonstration; derived statistics only.
+      </p>
+      <p>
+        Facility locations are DLS centroids (median accuracy ~270 m).
+        Pipeline: <a href="https://github.com/rbhughes/methane-outliers">methane-outliers</a>
+        on <a href="https://github.com/rbhughes/petrinex-etl">petrinex-etl</a>.
+        Basemap tiles by <a href="https://openfreemap.org">OpenFreeMap</a>.
+      </p>
+    </footer>
+
+    <script src="../scripts/app.js"></script>
+  </body>
+</html>
+
+<style is:global>
+  /* Committed light look; tokens from the reference dataviz palette. */
+  :root {
+    --page: #f9f9f7;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --hairline: #e1e0d9;
+    --border: rgba(11, 11, 11, 0.1);
+    --seq-150: #b7d3f6;
+    --seq-300: #6da7ec;
+    --seq-450: #2a78d6;
+    --seq-550: #1c5cab;
+    --seq-700: #0d366b;
+    --accent: #256abf;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--page);
+    color: var(--ink);
+    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  a { color: var(--accent); }
+  .masthead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem 0.4rem;
+    flex-wrap: wrap;
+  }
+  h1 { margin: 0; font-size: 1.45rem; letter-spacing: -0.01em; }
+  .tagline { margin: 0.15rem 0 0; color: var(--ink-2); max-width: 46rem; }
+  .window-badge {
+    color: var(--ink-2);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+    gap: 0.7rem;
+    padding: 0.8rem 1.4rem 0.2rem;
+  }
+  .tile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+  }
+  .tile .label { color: var(--ink-2); font-size: 0.82rem; }
+  .tile .value { font-size: 1.5rem; font-weight: 650; margin-top: 0.1rem; }
+  .tile .unit { color: var(--muted); font-size: 0.82rem; font-weight: 400; }
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 0.7rem 1.4rem;
+  }
+  .metric-toggle {
+    display: inline-flex;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 3px;
+  }
+  .metric-toggle button {
+    border: 0;
+    background: transparent;
+    color: var(--ink-2);
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .metric-toggle button[aria-selected="true"] {
+    background: var(--ink);
+    color: var(--surface);
+    font-weight: 600;
+  }
+  .legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    color: var(--ink-2);
+    font-size: 0.8rem;
+  }
+  .legend-title { margin-right: 0.2rem; color: var(--muted); }
+  .swatch {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--c);
+    display: inline-block;
+  }
+  .swatch.ring { outline: 1.5px solid var(--ink); outline-offset: 1px; }
+  .layout {
+    display: flex;
+    gap: 0.9rem;
+    padding: 0 1.4rem 1rem;
+    flex: 1;
+    min-height: 480px;
+  }
+  #map {
+    flex: 2.2;
+    min-width: 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .panel {
+    flex: 1;
+    min-width: 300px;
+    max-width: 430px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    overflow: auto;
+    max-height: 72vh;
+  }
+  .panel h2 { margin: 0; font-size: 1.02rem; }
+  .panel-note { color: var(--muted); font-size: 0.8rem; margin: 0.25rem 0 0.6rem; }
+  #outliers { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  #outliers th {
+    text-align: left; color: var(--muted); font-weight: 500;
+    border-bottom: 1px solid var(--hairline); padding: 0.25rem 0.3rem;
+  }
+  #outliers td {
+    padding: 0.34rem 0.3rem;
+    border-bottom: 1px solid var(--hairline);
+    vertical-align: top;
+  }
+  #outliers tr[data-id] { cursor: pointer; }
+  #outliers tr[data-id]:hover td { background: var(--page); }
+  #outliers .num { text-align: right; font-variant-numeric: tabular-nums; }
+  #outliers .fac { font-weight: 600; }
+  #outliers .sub { color: var(--muted); font-size: 0.76rem; display: block; }
+  footer {
+    color: var(--muted);
+    font-size: 0.78rem;
+    padding: 0.4rem 1.4rem 1rem;
+  }
+  footer p { margin: 0.2rem 0; }
+  .maplibregl-popup-content {
+    font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+    border-radius: 8px;
+    box-shadow: 0 2px 12px rgba(11, 11, 11, 0.18);
+    padding: 0.6rem 0.75rem;
+  }
+  .pop-name { font-weight: 650; }
+  .pop-sub { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.3rem; }
+  .pop-row { display: flex; justify-content: space-between; gap: 1rem; }
+  .pop-row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
+  .pop-flag { color: #d03b3b; font-weight: 650; margin-top: 0.25rem; }
+  @media (max-width: 900px) {
+    .layout { flex-direction: column; }
+    #map { min-height: 420px; flex: none; }
+    .panel { max-width: none; max-height: 40vh; }
+  }
+</style>

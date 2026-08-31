@@ -2,3 +2,7 @@ data/
 __pycache__/
 *.egg-info/
 .venv/
+site/node_modules/
+site/dist/
+site/public/data/
+site/.astro/

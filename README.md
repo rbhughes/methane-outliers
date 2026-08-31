@@ -52,6 +52,22 @@ Current scale: ~22,800 facilities scored per window, 100% located via
 LSD-centroid conversion (p50 accuracy 267 m, measured against 532,623
 AER ST37 surveyed wells).
 
+## The site (`site/`)
+
+Astro static site, MapLibre GL map, OpenFreeMap Positron basemap (no
+key, no tile server). Facilities are colored by peer percentile on a
+sequential ramp, sized by volume, outliers ringed; hover for per-metric
+tooltips, click a top-outlier row to fly to it. The site fetches
+`facilities.geojson` and `summary.json` at runtime from
+`PUBLIC_DATA_BASE` (R2 in production, `/data` locally) — so a weekly
+data refresh never rebuilds the site.
+
+```sh
+cd site && npm install
+mkdir -p public/data && cp ../data/site/*.{geojson,json} public/data/
+npm run dev
+```
+
 ## Data licence
 
 Petrinex data is owned by the Government of Alberta (Crown copyright;

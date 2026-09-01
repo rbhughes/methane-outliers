@@ -1,8 +1,9 @@
 # methane-outliers
 
-Peer-expectation outlier scores for vented, flared and fuel gas at
-Alberta oil and gas facilities, from Petrinex public data — the full
-pipeline for a weekly-refreshed map website: ETL on GitHub Actions,
+Peer-expectation outlier scores for vented, flared and fuel gas —
+**Alberta facilities and Texas leases**, same lens, two regulatory
+regimes — live at [methane.purr.io](https://methane.purr.io). The
+full pipeline: ETL on GitHub Actions (Alberta weekly, Texas monthly),
 artifacts in Cloudflare R2, an Astro + MapLibre site on Cloudflare
 Pages.
 
@@ -31,40 +32,55 @@ Deliberately simple and fully explainable; every choice is in
   outlier when its percentile is >= 0.95 AND its volume is material
   (>= 50 e3m3 over the window).
 
+## The Texas model (v1)
+
+Same method at lease grain, from the
+[rrc-etl](https://github.com/rbhughes/rrc-etl) data layer: metrics
+are flared+vented gas (disposition code 04 — Texas bulk data never
+splits them; see rrc-etl's README) and lease fuel (code 01); peer
+group = oil/gas class x gas-equivalent-throughput quartile; window =
+trailing 12 months ending 2 months before the newest cycle (the last
+two are visibly incomplete). Leases carry no coordinates, so each is
+assigned its wells' modal county and the map is a county choropleth.
+
 ## Run it
 
 ```sh
-# data layer first (see petrinex-etl): fetch-vol, fetch-infra,
-# build-facilities, build-infra
-uv sync
-uv run methane build --data ../petrinex-etl/data
+# data layers first: petrinex-etl (fetch-vol, fetch-infra,
+# build-facilities, build-infra) and rrc-etl (fetch-pdq, build-pdq)
+uv sync --extra tx
+uv run methane build ab --data ../petrinex-etl/data
+uv run methane build tx --data ../rrc-etl/data
 ```
 
-Outputs land in `data/site/`:
+Outputs land in `data/site/<jurisdiction>/`:
 
 | artifact | purpose |
 |---|---|
 | `scores.parquet` | full scored table; the record of truth |
-| `facilities.geojson` | map points with score properties (~8 MB) |
-| `summary.json` | window, totals, top-outlier lists for first paint |
+| `ab/facilities.geojson` | AB map points with score properties (~8 MB) |
+| `tx/county_stats.json` | TX per-county rollup for the choropleth |
+| `summary.json` | window, totals, top-outlier lists per jurisdiction |
 
-Current scale: ~22,800 facilities scored per window, 100% located via
-LSD-centroid conversion (p50 accuracy 267 m, measured against 532,623
-AER ST37 surveyed wells).
+Current scale: ~22,800 AB facilities (100% located via LSD-centroid
+conversion, p50 accuracy 267 m measured against 532,623 AER ST37
+surveyed wells) and ~153,000 TX leases (99.99% county-located) per
+window.
 
 ## The site (`site/`)
 
-Astro static site, MapLibre GL map, OpenFreeMap Positron basemap (no
-key, no tile server). Facilities are colored by peer percentile on a
-sequential ramp, sized by volume, outliers ringed; hover for per-metric
-tooltips, click a top-outlier row to fly to it. The site fetches
-`facilities.geojson` and `summary.json` at runtime from
-`PUBLIC_DATA_BASE` (R2 in production, `/data` locally) — so a weekly
-data refresh never rebuilds the site.
+Astro static site, MapLibre GL, OpenFreeMap Positron basemap (no key,
+no tile server). Three pages: `/` (the two-regime comparison story),
+`/ab/` (facility dot map — peer-percentile color, volume size,
+outlier rings, per-metric tooltips, fly-to from the table), `/tx/`
+(county choropleth over US Census boundaries, with top-outlier lease
+table zooming to counties). All data is fetched at runtime from
+`PUBLIC_DATA_BASE/<jurisdiction>/` (R2 in production, `/data`
+locally) — data refreshes never rebuild the site.
 
 ```sh
 cd site && npm install
-mkdir -p public/data && cp ../data/site/*.{geojson,json} public/data/
+mkdir -p public/data && cp -r ../data/site/ab ../data/site/tx public/data/
 npm run dev
 ```
 

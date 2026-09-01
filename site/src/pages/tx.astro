@@ -1,0 +1,65 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Texas Methane Outliers" path="/tx/">
+  <header class="masthead">
+    <div>
+      <h1>Texas: lease outliers</h1>
+      <p class="tagline">
+        Flared+vented and lease-fuel gas at ~150,000 producing leases,
+        scored against oil/gas-class and size peers. Railroad Commission
+        of Texas PDQ data. Texas bulk data never splits flared from
+        vented, so the combined series is shown.
+      </p>
+    </div>
+    <span class="window-badge" id="window-badge" hidden></span>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="State totals"></section>
+
+  <div class="controls">
+    <div class="metric-toggle" role="tablist" aria-label="Metric">
+      <button role="tab" data-metric="flare_vent" aria-selected="true">
+        Flared + vented</button>
+      <button role="tab" data-metric="fuel" aria-selected="false">
+        Lease fuel</button>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span class="legend-title">County total, Bcf</span>
+      <span class="swatch sq" style="--c: var(--seq-150)"></span><span>&lt;0.1</span>
+      <span class="swatch sq" style="--c: var(--seq-300)"></span><span>0.5</span>
+      <span class="swatch sq" style="--c: var(--seq-450)"></span><span>2</span>
+      <span class="swatch sq" style="--c: var(--seq-550)"></span><span>8</span>
+      <span class="swatch sq" style="--c: var(--seq-700)"></span><span>8+</span>
+    </div>
+  </div>
+
+  <main class="layout">
+    <div id="map" class="map-box" role="application" aria-label="County map"></div>
+    <aside class="panel">
+      <h2 id="panel-title">Top outlier leases</h2>
+      <p class="panel-note">
+        &ge;95th percentile of their peer group and &ge;2,000 MCF over the
+        window. Click a row to zoom to its county.
+      </p>
+      <table class="outliers" id="outliers">
+        <thead>
+          <tr><th scope="col">Lease</th><th scope="col">Operator</th>
+            <th scope="col" class="num">MMcf</th>
+            <th scope="col" class="num">&times; peer</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </aside>
+  </main>
+
+  <p slot="footer" id="attribution">
+    Source: Railroad Commission of Texas, Production Data Query dump.
+    Non-commercial demonstration; derived statistics only. Leases are
+    mapped to their wells&rsquo; modal county; volumes in MCF at
+    14.65 psi / 60&deg;F.
+  </p>
+
+  <script src="../scripts/tx.js"></script>
+</Base>

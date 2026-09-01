@@ -1,0 +1,70 @@
+# Monthly Texas ETL + site deploy. The RRC regenerates the PDQ dump
+# the last Saturday of each month; the 1st at 13:30 UTC always lands
+# after it. The dump is a full snapshot (~3.7 GB zip, ~35 GB
+# extracted) so nothing is cached — each run downloads fresh and the
+# build streams one table at a time to stay inside runner disk.
+name: tx
+
+on:
+  schedule:
+    - cron: "30 13 1 * *"
+  workflow_dispatch:
+
+concurrency:
+  group: tx
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      RRC_RAW: ${{ github.workspace }}/rrc-data/raw
+      RRC_OUT: ${{ github.workspace }}/rrc-data
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install (with rrc-etl)
+        run: uv sync --extra tx
+
+      - name: Fetch PDQ dump (~3.7 GB)
+        run: uv run rrc fetch-pdq
+
+      - name: Build PDQ parquet
+        run: |
+          uv run rrc build-pdq
+          rm -f "$RRC_RAW/PDQ_DSV.zip"
+
+      - name: Score leases, emit site artifacts
+        run: uv run methane build tx --data "$RRC_OUT" --out data/site/tx
+
+      - name: Publish data artifacts to R2
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          for f in scores.parquet county_stats.json summary.json; do
+            npx wrangler r2 object put "methane-outliers/site-data/tx/$f" \
+              --file "data/site/tx/$f" --remote
+          done
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Build site
+        working-directory: site
+        env:
+          PUBLIC_DATA_BASE: https://pub-45d719103a704b39a9b18888c4d12fad.r2.dev/site-data
+        run: |
+          npm ci
+          npm run build
+
+      - name: Deploy to Cloudflare Pages
+        working-directory: site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx wrangler pages deploy dist --project-name methane-outliers --branch main

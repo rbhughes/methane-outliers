@@ -1,7 +1,7 @@
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 
-const DATA = document.body.dataset.dataBase;
+const DATA = document.body.dataset.dataBase + "/ab";
 const METRICS = {
   vent: { label: "Vented", top: "top_vent", total: "total_vent_e3m3" },
   flare: { label: "Flared", top: "top_flare", total: "total_flare_e3m3" },

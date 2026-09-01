@@ -3,7 +3,7 @@ import argparse
 import os
 from pathlib import Path
 
-from . import scoring, site_data, tx
+from . import scoring, site_data, tx, windows
 
 
 def main() -> None:
@@ -33,6 +33,8 @@ def main() -> None:
             site = site_data.emit(out, run)
             print(f"  ab: {site['geojson_features']:,} map points, "
                   f"{site['geojson_mb']} MB geojson -> {out}")
+            w = windows.emit_ab(data, out)
+            print(f"  ab: top-window series, {w['ends']} window ends")
         else:
             data = Path(a.data or os.environ.get("RRC_OUT",
                                                  "../rrc-etl/data"))
@@ -49,6 +51,8 @@ def main() -> None:
             print(f"  tx: {site['geojson_features']:,} map points "
                   f"({site['geojson_mb']} MB), "
                   f"{site['counties']} counties -> {out}")
+            w = windows.emit_tx(data, out)
+            print(f"  tx: top-window series, {w['ends']} window ends")
 
 
 if __name__ == "__main__":

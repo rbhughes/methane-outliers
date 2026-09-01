@@ -77,6 +77,11 @@ jobs:
             "methane-outliers/site-data/ab/facilities.geojson" \
             --file /tmp/f.gz --content-type application/json \
             --content-encoding gzip --remote
+          gzip -9 -c data/site/ab/top_windows.json > /tmp/tw.gz
+          npx wrangler r2 object put \
+            "methane-outliers/site-data/ab/top_windows.json" \
+            --file /tmp/tw.gz --content-type application/json \
+            --content-encoding gzip --remote
 
       - name: Build site
         working-directory: site

@@ -60,6 +60,12 @@ jobs:
             --file /tmp/l.gz --content-type application/json \
             --content-encoding gzip --remote
 
+          gzip -9 -c data/site/tx/top_windows.json > /tmp/tw.gz
+          npx wrangler r2 object put \
+            "methane-outliers/site-data/tx/top_windows.json" \
+            --file /tmp/tw.gz --content-type application/json \
+            --content-encoding gzip --remote
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22

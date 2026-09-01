@@ -14,9 +14,11 @@ methane = "methane_outliers.cli:main"
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
+tx = ["rrc-etl"]
 
 [tool.uv.sources]
 petrinex-etl = { git = "https://github.com/rbhughes/petrinex-etl" }
+rrc-etl = { git = "https://github.com/rbhughes/rrc-etl" }
 
 [build-system]
 requires = ["setuptools>=68"]

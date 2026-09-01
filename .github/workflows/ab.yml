@@ -7,7 +7,7 @@
 # Data goes to R2 (public r2.dev URL, CORS-restricted to the site
 # origins); the site fetches it at runtime, so the Pages deploy only
 # changes when site code changes.
-name: pipeline
+name: ab
 
 on:
   schedule:
@@ -15,10 +15,10 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["site/**", "src/**", ".github/workflows/pipeline.yml"]
+    paths: ["site/**", "src/**", ".github/workflows/ab.yml"]
 
 concurrency:
-  group: pipeline
+  group: ab
   cancel-in-progress: false
 
 jobs:
@@ -55,7 +55,7 @@ jobs:
           uv run petrinex build-infra
 
       - name: Score facilities, emit site artifacts
-        run: uv run methane build --data "$PETRINEX_OUT" --out data/site
+        run: uv run methane build ab --data "$PETRINEX_OUT" --out data/site/ab
 
       - uses: actions/setup-node@v4
         with:
@@ -67,8 +67,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           for f in scores.parquet facilities.geojson summary.json; do
-            npx wrangler r2 object put "methane-outliers/site-data/$f" \
-              --file "data/site/$f" --remote
+            npx wrangler r2 object put "methane-outliers/site-data/ab/$f" \
+              --file "data/site/ab/$f" --remote
           done
 
       - name: Build site

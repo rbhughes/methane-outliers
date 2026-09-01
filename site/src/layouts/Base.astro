@@ -3,12 +3,6 @@
 // own page-specific styles on top.
 const { title, path = "/" } = Astro.props;
 const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
-const nav = [
-  ["/", "Overview"],
-  ["/map/", "Combined map"],
-  ["/ab/", "Alberta"],
-  ["/tx/", "Texas"],
-];
 ---
 
 <!doctype html>
@@ -30,9 +24,7 @@ const nav = [
   <body data-data-base={DATA_BASE}>
     <nav class="topnav">
       <span class="brand">Methane Outliers</span>
-      {nav.map(([href, label]) => (
-        <a href={href} class={path === href ? "active" : ""}>{label}</a>
-      ))}
+      <a href="https://github.com/rbhughes/methane-outliers">GitHub</a>
     </nav>
     <slot />
     <footer>

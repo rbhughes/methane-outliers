@@ -1,5 +1,5 @@
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  site: "https://methane-outliers.pages.dev",
+  site: "https://methane.purr.io",
 });

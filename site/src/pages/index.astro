@@ -10,6 +10,12 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Alberta Methane Outliers</title>
+    <link rel="canonical" href="https://methane.purr.io/" />
+    <script>
+      // Old jurisdiction-named host redirects to the canonical domain.
+      if (location.hostname === "ab-methane.purr.io")
+        location.replace("https://methane.purr.io" + location.pathname);
+    </script>
     <meta
       name="description"
       content="Peer-expectation outlier scores for vented, flared and fuel gas at Alberta oil and gas facilities, from Petrinex public data."

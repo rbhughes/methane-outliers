@@ -42,10 +42,13 @@ def main() -> None:
                                  "rrc build-pdq first")
             run = tx.score(data, out)
             print(f"  tx: scored {run['leases']:,} leases "
-                  f"({run['located']:,} with county), "
+                  f"({run['located']:,} with county, "
+                  f"{run['gis_located']:,} with GIS coords), "
                   f"{run['window_first']}..{run['window_last']}")
             site = tx.emit(out, run)
-            print(f"  tx: {site['counties']} counties -> {out}")
+            print(f"  tx: {site['geojson_features']:,} map points "
+                  f"({site['geojson_mb']} MB), "
+                  f"{site['counties']} counties -> {out}")
 
 
 if __name__ == "__main__":

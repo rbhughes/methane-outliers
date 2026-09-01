@@ -94,15 +94,38 @@ def score(data: Path, out: Path) -> dict:
     window pg as (partition by peer_key)
     """)
 
-    # Lease identity, operator, and modal county (via well completions).
+    # Lease identity, operator, modal county, and a surface location:
+    # the median of the lease's wells' GIS coordinates (median resists a
+    # single mislocated well). Leases whose wells don't match the GIS
+    # layer keep lat/lon NULL and appear only in tables, not on the map.
+    wloc = data / "wells" / "well_locations.parquet"
+    if wloc.exists():
+        centroid = f"""
+          select w.OIL_GAS_CODE, w.DISTRICT_NO, w.LEASE_NO,
+            median(l.lat) lat, median(l.lon) lon,
+            count(l.lat) wells_located, count(*) wells
+          from {wells} w
+          left join '{wloc}' l
+            on l.api_county = w.API_COUNTY_CODE
+           and l.api_unique = w.API_UNIQUE_NO
+          group by 1, 2, 3"""
+    else:
+        centroid = f"""
+          select OIL_GAS_CODE, DISTRICT_NO, LEASE_NO,
+            null::double lat, null::double lon,
+            0 wells_located, count(*) wells
+          from {wells} group by 1, 2, 3"""
+
     out.mkdir(parents=True, exist_ok=True)
     con.execute(f"""
       copy (
         select s.*, r.LEASE_NAME lease_name, r.OPERATOR_NAME operator_name,
                r.FIELD_NAME field_name, c.county_name, c.fips,
+               x.lat, x.lon, x.wells_located, x.wells,
                '{first}' window_first, '{last}' window_last
         from scored s
         left join {lease} r using (OIL_GAS_CODE, DISTRICT_NO, LEASE_NO)
+        left join ({centroid}) x using (OIL_GAS_CODE, DISTRICT_NO, LEASE_NO)
         left join (
           with wc as (
             select OIL_GAS_CODE, DISTRICT_NO, LEASE_NO, COUNTY_NAME,
@@ -121,11 +144,12 @@ def score(data: Path, out: Path) -> dict:
         ) c using (OIL_GAS_CODE, DISTRICT_NO, LEASE_NO)
       ) to '{out / "scores.parquet"}' (format parquet, compression zstd)
     """)
-    n, located = con.execute(f"""
-      select count(*), count(fips) from '{out / "scores.parquet"}'
+    n, county_located, gis_located = con.execute(f"""
+      select count(*), count(fips), count(lat)
+      from '{out / "scores.parquet"}'
     """).fetchone()
-    return {"window_first": first, "window_last": last,
-            "leases": n, "located": located}
+    return {"window_first": first, "window_last": last, "leases": n,
+            "located": county_located, "gis_located": gis_located}
 
 
 TOP_N = 25
@@ -150,7 +174,37 @@ def emit(out: Path, run: dict) -> dict:
         counties[fips] = {"name": name, "flare_vent": fv, "fuel": fuel,
                           "leases": leases, "outliers": outliers}
     (out / "county_stats.json").write_text(
-        json.dumps(counties, separators=(",", ":")))
+        json.dumps(counties, separators=(",", ":"), default=float))
+
+    # Lease dots: only located leases with any metric volume (zero/zero
+    # leases would be invisible and triple the payload at this scale).
+    feats = []
+    for r in con.execute(f"""
+        select DISTRICT_NO || '-' || LEASE_NO, lease_name, operator_name,
+          county_name, case OIL_GAS_CODE when 'O' then 'oil lease'
+                            else 'gas lease' end,
+          round(lat, 4), round(lon, 4),
+          round(flare_vent), round(fuel),
+          round(flare_vent_pct, 3), round(fuel_pct, 3),
+          round(throughput), wells, peer_count
+        from {scores}
+        where lat is not null and (flare_vent > 0 or fuel > 0)
+    """).fetchall():
+        (lid, name, op, cty, kind, lat, lon, fv, fuel,
+         fvp, fup, thr, wells, peers) = r
+        feats.append({
+            "type": "Feature",
+            "geometry": {"type": "Point", "coordinates": [lon, lat]},
+            "properties": {
+                "id": lid, "name": name, "operator": op, "county": cty,
+                "kind": kind, "flare_vent": fv, "fuel": fuel,
+                "flare_vent_pct": fvp, "fuel_pct": fup,
+                "throughput": thr, "wells": wells, "peers": peers,
+            },
+        })
+    (out / "leases.geojson").write_text(json.dumps(
+        {"type": "FeatureCollection", "features": feats},
+        separators=(",", ":"), default=float))
 
     def top(metric: str) -> list[dict]:
         return [dict(zip(
@@ -186,5 +240,8 @@ def emit(out: Path, run: dict) -> dict:
         "attribution": "Source: Railroad Commission of Texas, "
                        "Production Data Query dump.",
     }
-    (out / "summary.json").write_text(json.dumps(summary, indent=1))
-    return {"counties": len(counties)}
+    summary["leases_mapped"] = len(feats)
+    (out / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
+    return {"counties": len(counties), "geojson_features": len(feats),
+            "geojson_mb": round(
+                (out / "leases.geojson").stat().st_size / 1e6, 1)}

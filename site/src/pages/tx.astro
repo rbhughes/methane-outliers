@@ -26,12 +26,12 @@ import Base from "../layouts/Base.astro";
         Lease fuel</button>
     </div>
     <div class="legend" aria-hidden="true">
-      <span class="legend-title">County total, Bcf</span>
-      <span class="swatch sq" style="--c: var(--seq-150)"></span><span>&lt;0.1</span>
-      <span class="swatch sq" style="--c: var(--seq-300)"></span><span>0.5</span>
-      <span class="swatch sq" style="--c: var(--seq-450)"></span><span>2</span>
-      <span class="swatch sq" style="--c: var(--seq-550)"></span><span>8</span>
-      <span class="swatch sq" style="--c: var(--seq-700)"></span><span>8+</span>
+      <span class="legend-title">Peer percentile</span>
+      <span class="swatch" style="--c: var(--seq-150)"></span><span>&le;50</span>
+      <span class="swatch" style="--c: var(--seq-300)"></span><span>75</span>
+      <span class="swatch" style="--c: var(--seq-450)"></span><span>90</span>
+      <span class="swatch" style="--c: var(--seq-550)"></span><span>95</span>
+      <span class="swatch ring" style="--c: var(--seq-700)"></span><span>outlier</span>
     </div>
   </div>
 
@@ -41,7 +41,7 @@ import Base from "../layouts/Base.astro";
       <h2 id="panel-title">Top outlier leases</h2>
       <p class="panel-note">
         &ge;95th percentile of their peer group and &ge;2,000 MCF over the
-        window. Click a row to zoom to its county.
+        window. Click a row to locate it.
       </p>
       <table class="outliers" id="outliers">
         <thead>
@@ -55,10 +55,10 @@ import Base from "../layouts/Base.astro";
   </main>
 
   <p slot="footer" id="attribution">
-    Source: Railroad Commission of Texas, Production Data Query dump.
-    Non-commercial demonstration; derived statistics only. Leases are
-    mapped to their wells&rsquo; modal county; volumes in MCF at
-    14.65 psi / 60&deg;F.
+    Source: Railroad Commission of Texas, Production Data Query dump and
+    public GIS well locations. Non-commercial demonstration; derived
+    statistics only. Each lease is drawn at the median surface location
+    of its wells; volumes in MCF at 14.65 psi / 60&deg;F.
   </p>
 
   <script src="../scripts/tx.js"></script>

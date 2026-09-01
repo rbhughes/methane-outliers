@@ -1,0 +1,66 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Methane Outliers Map" path="/map/">
+  <header class="masthead">
+    <div>
+      <h1>Alberta and Texas, one lens</h1>
+      <p class="tagline">
+        Every producing reporting unit in both jurisdictions &mdash;
+        Alberta facilities and Texas leases &mdash; colored by the same
+        apples-to-apples measure: <strong>flared+vented gas as a share
+        of gas-equivalent production</strong>, over each unit&rsquo;s
+        latest 12-month window. Dot size is flared+vented volume.
+      </p>
+    </div>
+    <span class="window-badge" id="window-badge" hidden></span>
+  </header>
+
+  <section class="tiles" id="tiles" aria-label="Headline comparison"></section>
+
+  <div class="controls">
+    <div class="legend" aria-hidden="true">
+      <span class="legend-title">Flared+vented / production</span>
+      <span class="swatch" style="--c: var(--seq-150)"></span><span>&lt;0.1%</span>
+      <span class="swatch" style="--c: var(--seq-300)"></span><span>0.1&ndash;1%</span>
+      <span class="swatch" style="--c: var(--seq-450)"></span><span>1&ndash;5%</span>
+      <span class="swatch" style="--c: var(--seq-550)"></span><span>5&ndash;20%</span>
+      <span class="swatch" style="--c: var(--seq-700)"></span><span>&gt;20%</span>
+    </div>
+  </div>
+
+  <main class="layout">
+    <div id="map" class="map-box" role="application"
+      aria-label="Combined jurisdiction map"></div>
+    <aside class="panel">
+      <h2>Reading this honestly</h2>
+      <p class="panel-note" style="font-size: 0.84rem">
+        The two regimes report differently &mdash; different rules,
+        different measurement, and both under-report against satellite
+        observation &mdash; so absolute levels are not a scoreboard.
+        What this view compares fairly: the same physical ratio,
+        computed the same way, over the same window length. Units with
+        no production in the window (gas plants, gathering systems)
+        are not shown. Alberta volumes are converted at
+        1 e3m&sup3; = 35.3147 MCF.
+      </p>
+      <table class="outliers" id="worst">
+        <thead>
+          <tr><th scope="col">Highest intensity, material volumes</th>
+            <th scope="col" class="num">MMcf</th>
+            <th scope="col" class="num">%</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </aside>
+  </main>
+
+  <p slot="footer">
+    Alberta: information licensed from Petrinex; data &copy; Government
+    of Alberta. Texas: Railroad Commission of Texas public data.
+    Non-commercial demonstration; derived statistics only.
+  </p>
+
+  <script src="../scripts/combined.js"></script>
+</Base>

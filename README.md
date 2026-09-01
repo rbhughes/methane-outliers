@@ -40,8 +40,11 @@ are flared+vented gas (disposition code 04 — Texas bulk data never
 splits them; see rrc-etl's README) and lease fuel (code 01); peer
 group = oil/gas class x gas-equivalent-throughput quartile; window =
 trailing 12 months ending 2 months before the newest cycle (the last
-two are visibly incomplete). Leases carry no coordinates, so each is
-assigned its wells' modal county and the map is a county choropleth.
+two are visibly incomplete). Leases carry no coordinates in the dump,
+so each is drawn at the median surface location of its wells (rrc-etl
+`fetch-wells`, the RRC GIS layer), with its wells' modal county as
+identity; leases whose wells don't match the GIS layer stay in the
+tables but off the map.
 
 ## Run it
 
@@ -70,11 +73,14 @@ window.
 ## The site (`site/`)
 
 Astro static site, MapLibre GL, OpenFreeMap Positron basemap (no key,
-no tile server). Three pages: `/` (the two-regime comparison story),
-`/ab/` (facility dot map — peer-percentile color, volume size,
-outlier rings, per-metric tooltips, fly-to from the table), `/tx/`
-(county choropleth over US Census boundaries, with top-outlier lease
-table zooming to counties). All data is fetched at runtime from
+no tile server). Four pages: `/` (the two-regime comparison story),
+`/map/` (both jurisdictions on one map, colored by the
+apples-to-apples measure: flared+vented as a share of gas-equivalent
+production, same window length and math on both sides), `/ab/` and
+`/tx/` (per-jurisdiction dot maps — peer-percentile color, volume
+size, outlier rings, tooltips, fly-to from the outlier table; TX
+draws county boundaries as context). All data is fetched at runtime
+from
 `PUBLIC_DATA_BASE/<jurisdiction>/` (R2 in production, `/data`
 locally) — data refreshes never rebuild the site.
 

@@ -32,6 +32,9 @@ jobs:
       - name: Fetch PDQ dump (~3.7 GB)
         run: uv run rrc fetch-pdq
 
+      - name: Fetch well locations (RRC GIS, ~1M points)
+        run: uv run rrc fetch-wells
+
       - name: Build PDQ parquet
         run: |
           uv run rrc build-pdq
@@ -49,6 +52,13 @@ jobs:
             npx wrangler r2 object put "methane-outliers/site-data/tx/$f" \
               --file "data/site/tx/$f" --remote
           done
+          # geojson is stored pre-gzipped: r2.dev does not compress on
+          # the fly, and this is a 10x wire-size cut
+          gzip -9 -c data/site/tx/leases.geojson > /tmp/l.gz
+          npx wrangler r2 object put \
+            "methane-outliers/site-data/tx/leases.geojson" \
+            --file /tmp/l.gz --content-type application/json \
+            --content-encoding gzip --remote
 
       - uses: actions/setup-node@v4
         with:

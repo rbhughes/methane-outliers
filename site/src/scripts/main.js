@@ -99,7 +99,13 @@ function render() {
   const start =
     `${Math.floor(s / 12)}-${String((s % 12) + 1).padStart(2, "0")}`;
   const badge = document.getElementById("window-badge");
-  badge.textContent = `data window: ${start} → ${end}`;
+  const updated = Math.max(
+    ...Object.values(JURS).map((c) => c.updated ?? 0));
+  const updatedStr = updated
+    ? `<span class="sub">last updated: ${
+        new Date(updated).toISOString().slice(0, 10)}</span>`
+    : "";
+  badge.innerHTML = `data window: ${start} → ${end}${updatedStr}`;
   badge.hidden = false;
 
   for (const [jur, cfg] of Object.entries(JURS)) {
@@ -129,7 +135,12 @@ function render() {
 
 const dataReady = Promise.all(
   Object.values(JURS).map((c) =>
-    fetch(c.windowsUrl).then((r) => r.json()).then((w) => (c.windows = w))),
+    fetch(c.windowsUrl).then(async (r) => {
+      c.windows = await r.json();
+      // R2 stamps artifacts when an ETL run uploads them; the newest
+      // across jurisdictions is the site's "last updated".
+      c.updated = Date.parse(r.headers.get("last-modified") ?? "") || 0;
+    })),
 ).then(() => {
   const txEnds = new Set(JURS.tx.windows.ends);
   ends = JURS.ab.windows.ends.filter((e) => txEnds.has(e));

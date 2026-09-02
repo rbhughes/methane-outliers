@@ -90,9 +90,6 @@ function render() {
   const end = ends[idx];
   document.getElementById("slider-label").textContent =
     `12 months ending ${end}`;
-  const badge = document.getElementById("window-badge");
-  badge.textContent = `top 50 per jurisdiction · window ending ${end}`;
-  badge.hidden = false;
 
   for (const [jur, cfg] of Object.entries(JURS)) {
     const top = cfg.windows.top[end] ?? [];

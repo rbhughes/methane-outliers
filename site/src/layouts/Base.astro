@@ -42,30 +42,23 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
 </html>
 
 <style is:global>
-  /* Committed "medium" look built from Bryan's iTerm Fairy (Floss)
-     scheme: dusty-purple ground, candy-pink interactive accent, mint
-     and gold as spot colors. The sequential dot ramp is unchanged
-     because dots render on the light basemap inside the map boxes,
-     not on the page surface. */
+  /* Committed light look, page a notch grayer than the surfaces so
+     panels read as raised cards. Dot ramp is sequential red-orange
+     (OrRd) on the light basemap. */
   :root {
-    color-scheme: dark;
-    --page: #5a5475;
-    --surface: #4f4a66;
-    --raised: #8077a8;
-    --ink: #f8f8f2;
-    --ink-2: #e4e0ee;
-    --muted: #b8b0d2;
-    --hairline: #6f6791;
-    --border: rgba(248, 248, 242, 0.16);
-    /* Sequential red-orange (OrRd), light -> dark on the light basemap */
+    --page: #eeeeeb;
+    --surface: #fcfcfb;
+    --ink: #0b0b0b;
+    --ink-2: #52514e;
+    --muted: #898781;
+    --hairline: #ddddd6;
+    --border: rgba(11, 11, 11, 0.1);
     --seq-150: #fdd49e;
     --seq-300: #fc8d59;
     --seq-450: #ef6548;
     --seq-550: #d7301f;
     --seq-700: #990000;
-    --accent: #ffb8d1;
-    --accent-2: #c2ffdf;
-    --gold: #e6c000;
+    --accent: #256abf;
   }
   * { box-sizing: border-box; }
   body {
@@ -109,7 +102,7 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
     flex-wrap: wrap;
   }
   h1 { margin: 0; font-size: 1.45rem; letter-spacing: -0.01em; }
-  .tagline { margin: 0.15rem 0 0; color: var(--ink-2); max-width: 46rem; }
+  .tagline { margin: 0.15rem 0 0; color: var(--ink-2); }
   .window-badge {
     color: var(--ink-2);
     background: var(--surface);
@@ -232,7 +225,7 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
     color: var(--ink);
     background: var(--surface);
     border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(11, 11, 11, 0.35);
+    box-shadow: 0 2px 12px rgba(11, 11, 11, 0.18);
     padding: 0.6rem 0.75rem;
   }
   .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
@@ -251,7 +244,7 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
   .pop-sub { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.3rem; }
   .pop-row { display: flex; justify-content: space-between; gap: 1rem; }
   .pop-row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .pop-flag { color: #ff857f; font-weight: 650; margin-top: 0.25rem; }
+  .pop-flag { color: #d03b3b; font-weight: 650; margin-top: 0.25rem; }
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
     .map-box { min-height: 420px; flex: none; }

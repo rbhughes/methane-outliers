@@ -220,9 +220,11 @@ function ensureBulk(cfg) {
   return cfg.bulkReady;
 }
 
-const showAll = document.getElementById("show-all");
+// Inverted toggle: unchecked (default) shows the full unit cloud
+// under the top-50; checking it hides everything but the outliers.
+const outliersOnly = document.getElementById("outliers-only");
 async function syncBulk() {
-  const on = showAll.checked;
+  const on = !outliersOnly.checked;
   for (const cfg of Object.values(JURS)) {
     await cfg.mapReady;
     if (on && !cfg.map.getSource("bulk")) {
@@ -254,8 +256,8 @@ async function syncBulk() {
     }
   }
 }
-showAll.addEventListener("change", syncBulk);
-syncBulk(); // default-checked: load the clouds on page open
+outliersOnly.addEventListener("change", syncBulk);
+syncBulk(); // default-unchecked: load the clouds on page open
 
 document.getElementById("reset-extents").addEventListener("click", () => {
   for (const cfg of Object.values(JURS))

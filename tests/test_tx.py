@@ -89,7 +89,7 @@ def test_tx_scoring_and_geojson(data, tmp_path):
     assert site["geojson_features"] == 12   # zero/zero pad lease excluded
     gj = json.loads((out / "leases.geojson").read_text())
     p = next(f["properties"] for f in gj["features"]
-             if f["properties"]["id"] == "01-100000")
+             if f["properties"]["id"] == "G-01-100000")
     assert p["county"] == "GAINES" and p["wells"] == 1
     assert p["flare_vent"] == 200 and p["throughput"] == 2000
     sm = json.loads((out / "summary.json").read_text())

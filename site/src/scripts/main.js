@@ -55,6 +55,7 @@ const bulkFeat = (f, name, operator, sub, fv, i) => ({
   type: "Feature",
   geometry: f.geometry,
   properties: {
+    id: f.properties.id,
     name, operator, sub,
     fv_mcf: Math.round(fv),
     i: Math.round(i * 1e4) / 1e4,
@@ -110,6 +111,8 @@ function render() {
 
   for (const [jur, cfg] of Object.entries(JURS)) {
     const top = cfg.windows.top[end] ?? [];
+    cfg.topIds = new Set(top.map((u) => u.id));
+    if (cfg.searching) runSearch(cfg); // re-filter against this window
     const feats = top.map((u) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [u.lon, u.lat] },
@@ -277,52 +280,64 @@ document.getElementById("reset-extents").addEventListener("click", () => {
 });
 
 // Per-map search over ALL units (name or operator, case-insensitive).
-// Matches replace the top-50 layer until the box is cleared.
+// Matches replace the top-50 layer and the cloud until the box is
+// cleared. With "show outliers only" checked the filters AND: only
+// matches in the CURRENT window's top-50 draw, and the two-number
+// count explains a blank map ("212 matches · 0 in top 50").
+async function runSearch(cfg, opts = {}) {
+  const q = cfg.searchInput.value.trim().toLowerCase();
+  await cfg.mapReady;
+  if (q.length < 2) {
+    cfg.searching = false;
+    cfg.map.getSource("search")?.setData(
+      { type: "FeatureCollection", features: [] });
+    cfg.map.getLayer("top") &&
+      cfg.map.setLayoutProperty("top", "visibility", "visible");
+    syncBulk(); // restore the cloud per the toggle
+    cfg.searchCount.textContent = "";
+    return;
+  }
+  if (!cfg.bulkFeatures) cfg.searchCount.textContent = "searching…";
+  await ensureBulk(cfg);
+  const matches = cfg.bulkFeatures.filter((f) => {
+    const p = f.properties;
+    return (p.name ?? "").toLowerCase().includes(q)
+        || (p.operator ?? "").toLowerCase().includes(q);
+  });
+  const inTop = matches.filter((f) => cfg.topIds?.has(f.properties.id));
+  const visible = outliersOnly.checked ? inTop : matches;
+  cfg.searching = true;
+  cfg.map.getSource("search")?.setData(
+    { type: "FeatureCollection", features: visible });
+  for (const layer of ["top", "bulk"])
+    cfg.map.getLayer(layer) &&
+      cfg.map.setLayoutProperty(layer, "visibility", "none");
+  cfg.searchCount.textContent = `${fmt(matches.length)} match${
+    matches.length === 1 ? "" : "es"} · ${fmt(inTop.length)} in top 50`;
+  if (opts.fit && visible.length) {
+    let minX = 180, minY = 90, maxX = -180, maxY = -90;
+    for (const f of visible) {
+      const [x, y] = f.geometry.coordinates;
+      minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+    }
+    cfg.map.fitBounds([[minX, minY], [maxX, maxY]],
+      { padding: 60, maxZoom: 9 });
+  }
+}
+
 for (const [jur, cfg] of Object.entries(JURS)) {
-  const input = document.getElementById(`${jur}-search`);
-  const count = document.getElementById(`${jur}-count`);
+  cfg.searchInput = document.getElementById(`${jur}-search`);
+  cfg.searchCount = document.getElementById(`${jur}-count`);
   let timer;
-  input.addEventListener("input", () => {
+  cfg.searchInput.addEventListener("input", () => {
     clearTimeout(timer);
-    timer = setTimeout(async () => {
-      const q = input.value.trim().toLowerCase();
-      await cfg.mapReady;
-      if (q.length < 2) {
-        cfg.searching = false;
-        cfg.map.getSource("search")?.setData(
-          { type: "FeatureCollection", features: [] });
-        cfg.map.getLayer("top") &&
-          cfg.map.setLayoutProperty("top", "visibility", "visible");
-        syncBulk(); // restore the cloud per the toggle
-        count.textContent = "";
-        return;
-      }
-      count.textContent = "searching…";
-      await ensureBulk(cfg);
-      const matches = cfg.bulkFeatures.filter((f) => {
-        const p = f.properties;
-        return (p.name ?? "").toLowerCase().includes(q)
-            || (p.operator ?? "").toLowerCase().includes(q);
-      });
-      cfg.searching = true;
-      cfg.map.getSource("search")?.setData(
-        { type: "FeatureCollection", features: matches });
-      // Matches are the ONLY thing on the map while searching.
-      for (const layer of ["top", "bulk"])
-        cfg.map.getLayer(layer) &&
-          cfg.map.setLayoutProperty(layer, "visibility", "none");
-      count.textContent = `${fmt(matches.length)} match${
-        matches.length === 1 ? "" : "es"}`;
-      if (matches.length) {
-        let minX = 180, minY = 90, maxX = -180, maxY = -90;
-        for (const f of matches) {
-          const [x, y] = f.geometry.coordinates;
-          minX = Math.min(minX, x); maxX = Math.max(maxX, x);
-          minY = Math.min(minY, y); maxY = Math.max(maxY, y);
-        }
-        cfg.map.fitBounds([[minX, minY], [maxX, maxY]],
-          { padding: 60, maxZoom: 9 });
-      }
-    }, 300);
+    timer = setTimeout(() => runSearch(cfg, { fit: true }), 300);
   });
 }
+
+// Toggling outliers-only re-filters any active search in place.
+outliersOnly.addEventListener("change", () => {
+  for (const cfg of Object.values(JURS))
+    if (cfg.searching) runSearch(cfg);
+});

@@ -180,7 +180,8 @@ def emit(out: Path, run: dict) -> dict:
     # search must find any lease or operator by name, not just emitters.
     feats = []
     for r in con.execute(f"""
-        select DISTRICT_NO || '-' || LEASE_NO, lease_name, operator_name,
+        select OIL_GAS_CODE || '-' || DISTRICT_NO || '-' || LEASE_NO,
+          lease_name, operator_name,
           county_name, case OIL_GAS_CODE when 'O' then 'oil lease'
                             else 'gas lease' end,
           round(lat, 4), round(lon, 4),

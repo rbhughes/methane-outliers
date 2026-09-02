@@ -33,8 +33,8 @@ const JURS = {
       const p = f.properties;
       const fv = (p.vent + p.flare) * E3M3_TO_MCF;
       const thr = p.throughput * E3M3_TO_MCF;
-      if (!(thr > 0)) return null;
-      return bulkFeat(f, p.name, p.operator, p.subtype, fv, fv / thr);
+      return bulkFeat(f, p.name, p.operator, p.subtype, fv,
+                      thr > 0 ? fv / thr : 0);
     },
   },
   tx: {
@@ -44,10 +44,9 @@ const JURS = {
     bulkUrl: `${DATA}/tx/leases.geojson`,
     bulkFeature(f) {
       const p = f.properties;
-      if (!(p.throughput > 0)) return null;
       return bulkFeat(f, p.name, p.operator,
         `${p.county} Co. · ${p.kind}`, p.flare_vent,
-        p.flare_vent / p.throughput);
+        p.throughput > 0 ? p.flare_vent / p.throughput : 0);
     },
   },
 };
@@ -158,8 +157,27 @@ for (const [jur, cfg] of Object.entries(JURS)) {
       },
       layout: { "circle-sort-key": ["*", -1, ["get", "fv_mcf"]] },
     });
+    cfg.map.addSource("search", {
+      type: "geojson",
+      data: { type: "FeatureCollection", features: [] },
+    });
+    cfg.map.addLayer({
+      id: "search",
+      type: "circle",
+      source: "search",
+      paint: {
+        "circle-color": colorExpr,
+        "circle-radius": [
+          "interpolate", ["linear"], ["sqrt", ["get", "fv_mcf"]],
+          0, 4, 100, 5, 800, 13,
+        ],
+        "circle-opacity": 0.9,
+        "circle-stroke-color": "#0b0b0b",
+        "circle-stroke-width": 1.1,
+      },
+    });
     const popup = new maplibregl.Popup({ closeButton: false, closeOnClick: false });
-    for (const layer of ["top", "bulk"]) {
+    for (const layer of ["top", "bulk", "search"]) {
       cfg.map.on("mousemove", layer, (e) => {
         cfg.map.getCanvas().style.cursor = "pointer";
         const f = e.features[0];
@@ -182,21 +200,26 @@ for (const [jur, cfg] of Object.entries(JURS)) {
   });
 }
 
-// "Show all" toggle: lazy-load each jurisdiction's full cloud once,
-// then flip layer visibility. Drawn under the top-50 layer, no rings.
+// Full unit clouds, lazy-loaded once per jurisdiction and shared by
+// the "show all" toggle and the search boxes.
+function ensureBulk(cfg) {
+  cfg.bulkReady ??= fetch(cfg.bulkUrl)
+    .then((r) => r.json())
+    .then((geo) => {
+      cfg.bulkFeatures = geo.features.map(cfg.bulkFeature);
+    });
+  return cfg.bulkReady;
+}
+
 document.getElementById("show-all").addEventListener("change", async (e) => {
   const on = e.target.checked;
   for (const cfg of Object.values(JURS)) {
     await cfg.mapReady;
-    if (on && !cfg.bulkLoaded) {
-      cfg.bulkLoaded = true;
-      const geo = await fetch(cfg.bulkUrl).then((r) => r.json());
+    if (on && !cfg.map.getSource("bulk")) {
+      await ensureBulk(cfg);
       cfg.map.addSource("bulk", {
         type: "geojson",
-        data: {
-          type: "FeatureCollection",
-          features: geo.features.map(cfg.bulkFeature).filter(Boolean),
-        },
+        data: { type: "FeatureCollection", features: cfg.bulkFeatures },
       });
       cfg.map.addLayer({
         id: "bulk",
@@ -217,3 +240,49 @@ document.getElementById("show-all").addEventListener("change", async (e) => {
     }
   }
 });
+
+// Per-map search over ALL units (name or operator, case-insensitive).
+// Matches replace the top-50 layer until the box is cleared.
+for (const [jur, cfg] of Object.entries(JURS)) {
+  const input = document.getElementById(`${jur}-search`);
+  const count = document.getElementById(`${jur}-count`);
+  let timer;
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      const q = input.value.trim().toLowerCase();
+      await cfg.mapReady;
+      if (q.length < 2) {
+        cfg.map.getSource("search")?.setData(
+          { type: "FeatureCollection", features: [] });
+        cfg.map.getLayer("top") &&
+          cfg.map.setLayoutProperty("top", "visibility", "visible");
+        count.textContent = "";
+        return;
+      }
+      count.textContent = "searching…";
+      await ensureBulk(cfg);
+      const matches = cfg.bulkFeatures.filter((f) => {
+        const p = f.properties;
+        return (p.name ?? "").toLowerCase().includes(q)
+            || (p.operator ?? "").toLowerCase().includes(q);
+      });
+      cfg.map.getSource("search")?.setData(
+        { type: "FeatureCollection", features: matches });
+      cfg.map.getLayer("top") &&
+        cfg.map.setLayoutProperty("top", "visibility", "none");
+      count.textContent = `${fmt(matches.length)} match${
+        matches.length === 1 ? "" : "es"}`;
+      if (matches.length) {
+        let minX = 180, minY = 90, maxX = -180, maxY = -90;
+        for (const f of matches) {
+          const [x, y] = f.geometry.coordinates;
+          minX = Math.min(minX, x); maxX = Math.max(maxX, x);
+          minY = Math.min(minY, y); maxY = Math.max(maxY, y);
+        }
+        cfg.map.fitBounds([[minX, minY], [maxX, maxY]],
+          { padding: 60, maxZoom: 9 });
+      }
+    }, 300);
+  });
+}

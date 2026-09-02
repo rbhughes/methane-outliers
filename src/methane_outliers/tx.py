@@ -176,8 +176,8 @@ def emit(out: Path, run: dict) -> dict:
     (out / "county_stats.json").write_text(
         json.dumps(counties, separators=(",", ":"), default=float))
 
-    # Lease dots: only located leases with any metric volume (zero/zero
-    # leases would be invisible and triple the payload at this scale).
+    # Lease dots: every located lease, including zero/zero — the site's
+    # search must find any lease or operator by name, not just emitters.
     feats = []
     for r in con.execute(f"""
         select DISTRICT_NO || '-' || LEASE_NO, lease_name, operator_name,
@@ -188,7 +188,7 @@ def emit(out: Path, run: dict) -> dict:
           round(flare_vent_pct, 3), round(fuel_pct, 3),
           round(throughput), wells, peer_count
         from {scores}
-        where lat is not null and (flare_vent > 0 or fuel > 0)
+        where lat is not null
     """).fetchall():
         (lid, name, op, cty, kind, lat, lon, fv, fuel,
          fvp, fup, thr, wells, peers) = r

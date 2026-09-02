@@ -63,6 +63,7 @@ const bulkFeat = (f, name, operator, sub, fv, i) => ({
 
 let ends = [];
 let idx = 0;
+window._jurs = JURS; // debugging handle
 
 function popupHtml(p, jurLabel) {
   return `<div class="pop-name">${p.name ?? "?"}</div>
@@ -219,8 +220,9 @@ function ensureBulk(cfg) {
   return cfg.bulkReady;
 }
 
-document.getElementById("show-all").addEventListener("change", async (e) => {
-  const on = e.target.checked;
+const showAll = document.getElementById("show-all");
+async function syncBulk() {
+  const on = showAll.checked;
   for (const cfg of Object.values(JURS)) {
     await cfg.mapReady;
     if (on && !cfg.map.getSource("bulk")) {
@@ -237,9 +239,13 @@ document.getElementById("show-all").addEventListener("change", async (e) => {
           "circle-color": colorExpr,
           "circle-radius": [
             "interpolate", ["linear"], ["sqrt", ["get", "fv_mcf"]],
-            0, 1.4, 100, 2.2, 800, 7,
+            0, 1.8, 100, 2.6, 800, 7,
           ],
-          "circle-opacity": 0.45,
+          "circle-opacity": 0.6,
+          // the ramp's light end vanishes on the light basemap; a
+          // faint neutral stroke keeps zero-ish units present
+          "circle-stroke-color": "rgba(11, 11, 11, 0.35)",
+          "circle-stroke-width": 0.5,
         },
       }, "top");
     } else if (cfg.map.getLayer("bulk")) {
@@ -247,6 +253,13 @@ document.getElementById("show-all").addEventListener("change", async (e) => {
         on ? "visible" : "none");
     }
   }
+}
+showAll.addEventListener("change", syncBulk);
+syncBulk(); // default-checked: load the clouds on page open
+
+document.getElementById("reset-extents").addEventListener("click", () => {
+  for (const cfg of Object.values(JURS))
+    cfg.map.fitBounds(cfg.bounds, { padding: 14 });
 });
 
 // Per-map search over ALL units (name or operator, case-insensitive).

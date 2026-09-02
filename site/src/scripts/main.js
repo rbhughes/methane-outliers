@@ -261,9 +261,10 @@ async function syncBulk() {
           "circle-stroke-width": 0.5,
         },
       }, "top");
-    } else if (cfg.map.getLayer("bulk")) {
+    }
+    if (cfg.map.getLayer("bulk")) {
       cfg.map.setLayoutProperty("bulk", "visibility",
-        on ? "visible" : "none");
+        on && !cfg.searching ? "visible" : "none");
     }
   }
 }
@@ -287,10 +288,12 @@ for (const [jur, cfg] of Object.entries(JURS)) {
       const q = input.value.trim().toLowerCase();
       await cfg.mapReady;
       if (q.length < 2) {
+        cfg.searching = false;
         cfg.map.getSource("search")?.setData(
           { type: "FeatureCollection", features: [] });
         cfg.map.getLayer("top") &&
           cfg.map.setLayoutProperty("top", "visibility", "visible");
+        syncBulk(); // restore the cloud per the toggle
         count.textContent = "";
         return;
       }
@@ -301,10 +304,13 @@ for (const [jur, cfg] of Object.entries(JURS)) {
         return (p.name ?? "").toLowerCase().includes(q)
             || (p.operator ?? "").toLowerCase().includes(q);
       });
+      cfg.searching = true;
       cfg.map.getSource("search")?.setData(
         { type: "FeatureCollection", features: matches });
-      cfg.map.getLayer("top") &&
-        cfg.map.setLayoutProperty("top", "visibility", "none");
+      // Matches are the ONLY thing on the map while searching.
+      for (const layer of ["top", "bulk"])
+        cfg.map.getLayer(layer) &&
+          cfg.map.setLayoutProperty(layer, "visibility", "none");
       count.textContent = `${fmt(matches.length)} match${
         matches.length === 1 ? "" : "es"}`;
       if (matches.length) {

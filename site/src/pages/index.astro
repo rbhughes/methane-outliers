@@ -23,7 +23,7 @@ import Base from "../layouts/Base.astro";
     </div>
     <label class="toggle">
       <input type="checkbox" id="show-all" />
-      show all producing units <span class="muted">(latest window)</span>
+      show all units <span class="muted">(latest window)</span>
     </label>
     <div class="legend" aria-hidden="true">
       <span class="legend-title">Flared+vented / production</span>
@@ -38,6 +38,11 @@ import Base from "../layouts/Base.astro";
   <main class="duo">
     <section class="jur">
       <h2 id="ab-head">Alberta <span class="muted">facilities</span></h2>
+      <div class="search-row">
+        <input type="search" id="ab-search" autocomplete="off"
+          placeholder="Search facility or operator (e.g. cenovus)&hellip;" />
+        <span class="search-count" id="ab-count"></span>
+      </div>
       <div id="ab-map" class="map-box" role="application"
         aria-label="Alberta top emitters"></div>
       <table class="outliers" id="ab-list">
@@ -49,6 +54,11 @@ import Base from "../layouts/Base.astro";
     </section>
     <section class="jur">
       <h2 id="tx-head">Texas <span class="muted">leases</span></h2>
+      <div class="search-row">
+        <input type="search" id="tx-search" autocomplete="off"
+          placeholder="Search lease or operator (e.g. apache)&hellip;" />
+        <span class="search-count" id="tx-count"></span>
+      </div>
       <div id="tx-map" class="map-box" role="application"
         aria-label="Texas top emitters"></div>
       <table class="outliers" id="tx-list">
@@ -158,7 +168,33 @@ import Base from "../layouts/Base.astro";
   .jur .outliers { margin-top: 0.6rem; font-size: 0.83rem; }
   .story {
     padding: 1.2rem 1.4rem 0.6rem;
-    max-width: 62rem;
+  }
+  .search-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0 0 0.5rem;
+  }
+  .search-row input {
+    flex: 1;
+    max-width: 24rem;
+    background: var(--surface);
+    color: var(--ink);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.35rem 0.7rem;
+    font: inherit;
+    font-size: 0.88rem;
+  }
+  .search-row input::placeholder { color: var(--muted); }
+  .search-row input:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .search-count {
+    color: var(--muted);
+    font-size: 0.82rem;
+    white-space: nowrap;
   }
   .story h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
   .story ul { margin: 0; padding-left: 1.2rem; }

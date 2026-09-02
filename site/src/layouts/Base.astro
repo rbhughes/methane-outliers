@@ -42,20 +42,25 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
 </html>
 
 <style is:global>
+  /* Committed "medium" look: Nord-based mid-gray chrome. The
+     sequential dot ramp is unchanged because dots render on the light
+     basemap inside the map boxes, not on the page surface. */
   :root {
-    --page: #f9f9f7;
-    --surface: #fcfcfb;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --hairline: #e1e0d9;
-    --border: rgba(11, 11, 11, 0.1);
+    color-scheme: dark;
+    --page: #3b4252;
+    --surface: #434c5e;
+    --raised: #4c566a;
+    --ink: #eceff4;
+    --ink-2: #d8dee9;
+    --muted: #a3adbf;
+    --hairline: #4c566a;
+    --border: rgba(236, 239, 244, 0.14);
     --seq-150: #b7d3f6;
     --seq-300: #6da7ec;
     --seq-450: #2a78d6;
     --seq-550: #1c5cab;
     --seq-700: #0d366b;
-    --accent: #256abf;
+    --accent: #88c0d0;
   }
   * { box-sizing: border-box; }
   body {
@@ -220,9 +225,22 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
   .maplibregl-popup-content {
     font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
     color: var(--ink);
+    background: var(--surface);
     border-radius: 8px;
-    box-shadow: 0 2px 12px rgba(11, 11, 11, 0.18);
+    box-shadow: 0 2px 12px rgba(11, 11, 11, 0.35);
     padding: 0.6rem 0.75rem;
+  }
+  .maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+    border-top-color: var(--surface);
+  }
+  .maplibregl-popup-anchor-top .maplibregl-popup-tip {
+    border-bottom-color: var(--surface);
+  }
+  .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+    border-right-color: var(--surface);
+  }
+  .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+    border-left-color: var(--surface);
   }
   .pop-name { font-weight: 650; }
   .pop-sub { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.3rem; }

@@ -8,7 +8,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 // it reflects each jurisdiction's latest scoring window.
 const DATA = document.body.dataset.dataBase;
 const E3M3_TO_MCF = 35.3147;
-const RAMP = ["#b7d3f6", "#6da7ec", "#2a78d6", "#1c5cab", "#0d366b"];
+// Sequential red-orange (OrRd), light -> dark on the light basemap.
+const RAMP = ["#fdd49e", "#fc8d59", "#ef6548", "#d7301f", "#990000"];
 const BREAKS = [0.001, 0.01, 0.05, 0.2];
 
 const fmt = (n) => Number(n).toLocaleString("en-US", { maximumFractionDigits: 0 });

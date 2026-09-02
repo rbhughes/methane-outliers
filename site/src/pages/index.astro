@@ -36,11 +36,12 @@ import Base from "../layouts/Base.astro";
       dehydrator stills, heavy-oil casing gas too thin and remote to
       be worth a compressor &mdash; all quietly exhaled rather than
       dramatically burned. That distinction matters, because venting
-      is 100% methane and flaring is roughly 98% destruction &mdash;
-      except <a href="https://doi.org/10.1126/science.abq0385">the
-      surveys keep finding about one flare in ten unlit or
-      sulking</a>, which is how a solution becomes a rounding error.
-      It is also why the maps below count the two together. The last
+      is 100% methane while a lit flare destroys about 98% of it
+      &mdash; but <a href="https://doi.org/10.1126/science.abq0385">
+      aerial surveys keep finding flares that are unlit or burning
+      poorly</a>, dragging real-world destruction down to roughly 91%
+      and tripling the methane that flaring was assumed to emit. It
+      is also why the maps below count venting and flaring together. The last
       decade&rsquo;s real progress came less from regulators than from
       investors, LNG buyers and satellites that could finally
       <a href="https://carbonmapper.org">count the flames from
@@ -88,8 +89,10 @@ import Base from "../layouts/Base.astro";
       <div class="table-card">
       <table class="outliers" id="ab-list">
         <thead><tr><th scope="col">Facility</th>
-          <th scope="col" class="num">MMcf</th>
-          <th scope="col" class="num">%</th></tr></thead>
+          <th scope="col" class="num">flared+vented MMcf</th>
+          <th scope="col" class="num"
+            title="Flared+vented gas as a share of the facility's own gas-equivalent production over the window">
+            % of own production</th></tr></thead>
         <tbody></tbody>
       </table>
       </div>
@@ -108,8 +111,10 @@ import Base from "../layouts/Base.astro";
       <div class="table-card">
       <table class="outliers" id="tx-list">
         <thead><tr><th scope="col">Lease</th>
-          <th scope="col" class="num">MMcf</th>
-          <th scope="col" class="num">%</th></tr></thead>
+          <th scope="col" class="num">flared+vented MMcf</th>
+          <th scope="col" class="num"
+            title="Flared+vented gas as a share of the lease's own gas-equivalent production over the window">
+            % of own production</th></tr></thead>
         <tbody></tbody>
       </table>
       </div>
@@ -222,16 +227,23 @@ import Base from "../layouts/Base.astro";
   .intro {
     padding: 0.4rem 1.4rem 0.2rem;
   }
+  /* Prose reads like a news article: serif body, generous leading. */
+  .intro p,
+  .story li {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype",
+      "Times New Roman", serif;
+    font-size: 1.16rem;
+    line-height: 1.65;
+    color: var(--ink);
+  }
   .intro p {
-    margin: 0.5rem 0;
-    color: var(--ink-2);
+    margin: 0.7rem 0;
     max-width: none;
-    font-size: 1.1rem;
   }
   .intro .scale-note {
     color: var(--brand);
     font-style: italic;
-    font-size: 1rem;
+    font-size: 1.02rem;
   }
   .table-card {
     border: 1.5px solid var(--hairline);
@@ -282,7 +294,7 @@ import Base from "../layouts/Base.astro";
   }
   .story h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
   .story ul { margin: 0; padding-left: 1.2rem; }
-  .story li { margin: 0.45rem 0; color: var(--ink-2); font-size: 1.1rem; }
+  .story li { margin: 0.6rem 0; }
   .story strong { color: var(--ink); }
   .story p { color: var(--muted); font-size: 0.82rem; }
   @media (max-width: 900px) {

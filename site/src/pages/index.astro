@@ -12,6 +12,7 @@ import Base from "../layouts/Base.astro";
         production</strong> over the same rolling 12-month window.
       </p>
     </div>
+    <span class="window-badge" id="window-badge" hidden></span>
   </header>
 
   <section class="intro">
@@ -36,13 +37,15 @@ import Base from "../layouts/Base.astro";
       be worth a compressor &mdash; all quietly exhaled rather than
       dramatically burned. That distinction matters, because venting
       is 100% methane and flaring is roughly 98% destruction &mdash;
-      except the surveys keep finding about one flare in ten unlit or
-      sulking, which is how a solution becomes a rounding error. It is
-      also why the maps below count the two together. The last
+      except <a href="https://doi.org/10.1126/science.abq0385">the
+      surveys keep finding about one flare in ten unlit or
+      sulking</a>, which is how a solution becomes a rounding error.
+      It is also why the maps below count the two together. The last
       decade&rsquo;s real progress came less from regulators than from
-      investors, satellites and LNG buyers who could finally count the
-      flames from orbit &mdash; and the rules, in both jurisdictions,
-      have spent 2025 and 2026 quietly loosening again.
+      investors, LNG buyers and satellites that could finally
+      <a href="https://carbonmapper.org">count the flames from
+      orbit</a> &mdash; and the rules, in both jurisdictions, have
+      spent 2025 and 2026 quietly loosening again.
     </p>
     <p class="scale-note">
       For scale: 1 MMcf &mdash; the unit in the tables below &mdash;
@@ -82,12 +85,14 @@ import Base from "../layouts/Base.astro";
       </div>
       <div id="ab-map" class="map-box" role="application"
         aria-label="Alberta top emitters"></div>
+      <div class="table-card">
       <table class="outliers" id="ab-list">
         <thead><tr><th scope="col">Facility</th>
           <th scope="col" class="num">MMcf</th>
           <th scope="col" class="num">%</th></tr></thead>
         <tbody></tbody>
       </table>
+      </div>
     </section>
     <section class="jur">
       <div class="jur-head">
@@ -100,12 +105,14 @@ import Base from "../layouts/Base.astro";
       </div>
       <div id="tx-map" class="map-box" role="application"
         aria-label="Texas top emitters"></div>
+      <div class="table-card">
       <table class="outliers" id="tx-list">
         <thead><tr><th scope="col">Lease</th>
           <th scope="col" class="num">MMcf</th>
           <th scope="col" class="num">%</th></tr></thead>
         <tbody></tbody>
       </table>
+      </div>
     </section>
   </main>
 
@@ -144,8 +151,15 @@ import Base from "../layouts/Base.astro";
       </li>
       <li>
         <strong>Not a scoreboard.</strong> Different rules, different
-        measurement, and both jurisdictions under-report against
-        satellite observation. Absolute levels aren&rsquo;t comparable;
+        measurement, and both jurisdictions under-report: satellite
+        and aerial campaigns routinely observe more flaring and
+        venting than official filings admit &mdash; see
+        <a href="https://doi.org/10.1126/science.abq0385">Plant et
+        al. 2022 (<em>Science</em>)</a> on unlit and inefficient
+        flares, and the
+        <a href="https://www.iea.org/reports/global-methane-tracker-2025">IEA
+        Global Methane Tracker</a> on the gap between reported and
+        observed emissions. Absolute levels aren&rsquo;t comparable;
         the ratio, the outlier structure, and the trends are.
       </li>
     </ul>
@@ -212,11 +226,22 @@ import Base from "../layouts/Base.astro";
     margin: 0.5rem 0;
     color: var(--ink-2);
     max-width: none;
+    font-size: 1.1rem;
   }
   .intro .scale-note {
-    color: var(--muted);
-    font-size: 0.85rem;
+    color: var(--brand);
+    font-style: italic;
+    font-size: 1rem;
   }
+  .table-card {
+    border: 1.5px solid var(--hairline);
+    border-radius: 10px;
+    background: var(--surface);
+    overflow: hidden;
+    margin-top: 0.6rem;
+    padding: 0.2rem 0.6rem 0.4rem;
+  }
+  .table-card .outliers { margin-top: 0; }
   .story {
     padding: 1.2rem 1.4rem 0.6rem;
   }
@@ -257,7 +282,7 @@ import Base from "../layouts/Base.astro";
   }
   .story h2 { font-size: 1.1rem; margin: 0 0 0.5rem; }
   .story ul { margin: 0; padding-left: 1.2rem; }
-  .story li { margin: 0.45rem 0; color: var(--ink-2); }
+  .story li { margin: 0.45rem 0; color: var(--ink-2); font-size: 1.1rem; }
   .story strong { color: var(--ink); }
   .story p { color: var(--muted); font-size: 0.82rem; }
   @media (max-width: 900px) {

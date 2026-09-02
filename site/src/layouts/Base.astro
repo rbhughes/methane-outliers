@@ -42,25 +42,30 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
 </html>
 
 <style is:global>
-  /* Committed "medium" look: Nord-based mid-gray chrome. The
-     sequential dot ramp is unchanged because dots render on the light
-     basemap inside the map boxes, not on the page surface. */
+  /* Committed "medium" look built from Bryan's iTerm Fairy (Floss)
+     scheme: dusty-purple ground, candy-pink interactive accent, mint
+     and gold as spot colors. The sequential dot ramp is unchanged
+     because dots render on the light basemap inside the map boxes,
+     not on the page surface. */
   :root {
     color-scheme: dark;
-    --page: #3b4252;
-    --surface: #434c5e;
-    --raised: #4c566a;
-    --ink: #eceff4;
-    --ink-2: #d8dee9;
-    --muted: #a3adbf;
-    --hairline: #4c566a;
-    --border: rgba(236, 239, 244, 0.14);
-    --seq-150: #b7d3f6;
-    --seq-300: #6da7ec;
-    --seq-450: #2a78d6;
-    --seq-550: #1c5cab;
-    --seq-700: #0d366b;
-    --accent: #88c0d0;
+    --page: #5a5475;
+    --surface: #4f4a66;
+    --raised: #8077a8;
+    --ink: #f8f8f2;
+    --ink-2: #e4e0ee;
+    --muted: #b8b0d2;
+    --hairline: #6f6791;
+    --border: rgba(248, 248, 242, 0.16);
+    /* Sequential red-orange (OrRd), light -> dark on the light basemap */
+    --seq-150: #fdd49e;
+    --seq-300: #fc8d59;
+    --seq-450: #ef6548;
+    --seq-550: #d7301f;
+    --seq-700: #990000;
+    --accent: #ffb8d1;
+    --accent-2: #c2ffdf;
+    --gold: #e6c000;
   }
   * { box-sizing: border-box; }
   body {
@@ -246,7 +251,7 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
   .pop-sub { color: var(--muted); font-size: 0.76rem; margin-bottom: 0.3rem; }
   .pop-row { display: flex; justify-content: space-between; gap: 1rem; }
   .pop-row .v { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .pop-flag { color: #d03b3b; font-weight: 650; margin-top: 0.25rem; }
+  .pop-flag { color: #ff857f; font-weight: 650; margin-top: 0.25rem; }
   @media (max-width: 900px) {
     .layout { flex-direction: column; }
     .map-box { min-height: 420px; flex: none; }

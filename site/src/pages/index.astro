@@ -16,6 +16,43 @@ import Base from "../layouts/Base.astro";
     <span class="window-badge" id="window-badge" hidden></span>
   </header>
 
+  <section class="intro">
+    <p>
+      Operators burn methane for the same reason people throw away
+      packing peanuts: they wanted the thing in the box, not the
+      filler. In West Texas the box is oil, the filler is associated
+      gas &mdash; and gas needs a pipeline while oil just needs a
+      truck. When drilling outruns midstream, or Waha prices go
+      negative and buyers effectively charge you to take it, the
+      arithmetic is brutal and boring: burn the cheap byproduct, keep
+      selling the expensive one. Add completions flowback, plant
+      turnarounds and the occasional Texas freeze, and a flare is
+      really just the relief valve for a midstream system&rsquo;s bad
+      day.
+    </p>
+    <p>
+      Alberta solved the nowhere-to-put-it problem decades ago and got
+      stuck with the subtler one: gas that leaks by design.
+      Pneumatic controllers running on produced gas, tank vapors,
+      dehydrator stills, heavy-oil casing gas too thin and remote to
+      be worth a compressor &mdash; all quietly exhaled rather than
+      dramatically burned. That distinction matters, because venting
+      is 100% methane and flaring is roughly 98% destruction &mdash;
+      except the surveys keep finding about one flare in ten unlit or
+      sulking, which is how a solution becomes a rounding error. It is
+      also why the maps below count the two together. The last
+      decade&rsquo;s real progress came less from regulators than from
+      investors, satellites and LNG buyers who could finally count the
+      flames from orbit &mdash; and the rules, in both jurisdictions,
+      have spent 2025 and 2026 quietly loosening again.
+    </p>
+    <p class="scale-note">
+      For scale: 1 MMcf &mdash; the unit in the tables below &mdash;
+      is about a year&rsquo;s natural gas for a dozen homes, or the
+      energy in ~9,000 gallons of gasoline.
+    </p>
+  </section>
+
   <div class="controls">
     <div class="slider-wrap">
       <label for="window-slider" id="slider-label">12 months ending &hellip;</label>
@@ -37,11 +74,13 @@ import Base from "../layouts/Base.astro";
 
   <main class="duo">
     <section class="jur">
-      <h2 id="ab-head">Alberta <span class="muted">facilities</span></h2>
-      <div class="search-row">
-        <input type="search" id="ab-search" autocomplete="off"
-          placeholder="Search facility or operator (e.g. cenovus)&hellip;" />
-        <span class="search-count" id="ab-count"></span>
+      <div class="jur-head">
+        <h2 id="ab-head">Alberta <span class="muted">facilities</span></h2>
+        <div class="search-row">
+          <span class="search-count" id="ab-count"></span>
+          <input type="search" id="ab-search" autocomplete="off"
+            placeholder="Search facility or operator (e.g. cenovus)&hellip;" />
+        </div>
       </div>
       <div id="ab-map" class="map-box" role="application"
         aria-label="Alberta top emitters"></div>
@@ -53,11 +92,13 @@ import Base from "../layouts/Base.astro";
       </table>
     </section>
     <section class="jur">
-      <h2 id="tx-head">Texas <span class="muted">leases</span></h2>
-      <div class="search-row">
-        <input type="search" id="tx-search" autocomplete="off"
-          placeholder="Search lease or operator (e.g. apache)&hellip;" />
-        <span class="search-count" id="tx-count"></span>
+      <div class="jur-head">
+        <h2 id="tx-head">Texas <span class="muted">leases</span></h2>
+        <div class="search-row">
+          <span class="search-count" id="tx-count"></span>
+          <input type="search" id="tx-search" autocomplete="off"
+            placeholder="Search lease or operator (e.g. apache)&hellip;" />
+        </div>
       </div>
       <div id="tx-map" class="map-box" role="application"
         aria-label="Texas top emitters"></div>
@@ -166,18 +207,38 @@ import Base from "../layouts/Base.astro";
   }
   .jur .map-box { height: 46vh; min-height: 340px; }
   .jur .outliers { margin-top: 0.6rem; font-size: 0.83rem; }
+  .intro {
+    padding: 0.4rem 1.4rem 0.2rem;
+  }
+  .intro p {
+    margin: 0.5rem 0;
+    color: var(--ink-2);
+    max-width: none;
+  }
+  .intro .scale-note {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
   .story {
     padding: 1.2rem 1.4rem 0.6rem;
   }
+  .jur-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+    flex-wrap: wrap;
+    margin: 0 0 0.5rem;
+  }
+  .jur-head h2 { margin: 0; }
   .search-row {
     display: flex;
     align-items: center;
     gap: 0.6rem;
-    margin: 0 0 0.5rem;
+    margin-left: auto;
   }
   .search-row input {
-    flex: 1;
-    max-width: 24rem;
+    width: clamp(14rem, 22vw, 22rem);
     background: var(--surface);
     color: var(--ink);
     border: 1px solid var(--border);

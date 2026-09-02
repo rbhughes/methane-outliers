@@ -61,9 +61,10 @@ import Base from "../layouts/Base.astro";
       <input type="range" id="window-slider" min="0" max="0" value="0" />
     </div>
     <label class="toggle">
-      <input type="checkbox" id="show-all" />
+      <input type="checkbox" id="show-all" checked />
       show all units <span class="muted">(latest window)</span>
     </label>
+    <button type="button" id="reset-extents" class="btn">reset extents</button>
     <div class="legend" aria-hidden="true">
       <span class="legend-title">Flared+vented / production</span>
       <span class="swatch" style="--c: var(--seq-150)"></span><span>&lt;0.1%</span>
@@ -211,6 +212,18 @@ import Base from "../layouts/Base.astro";
     white-space: nowrap;
   }
   .toggle input { accent-color: var(--accent); }
+  .btn {
+    background: var(--surface);
+    color: var(--ink-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.3rem 0.8rem;
+    font: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--ink); }
   .muted { color: var(--muted); font-weight: 400; }
   .duo {
     display: grid;

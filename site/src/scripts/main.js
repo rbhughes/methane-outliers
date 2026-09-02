@@ -80,6 +80,9 @@ for (const [jur, cfg] of Object.entries(JURS)) {
     bounds: cfg.bounds,
     fitBoundsOptions: { padding: 14 },
     attributionControl: { compact: true },
+    // Two-finger page scrolling must not zoom the maps; deliberate
+    // zoom still works with cmd/ctrl+scroll, pinch, or the buttons.
+    cooperativeGestures: true,
   });
   cfg.map.addControl(new maplibregl.NavigationControl({ showCompass: false }));
   cfg.map.on("error", (e) => console.error(`[${jur}]`, e.error ?? e));
@@ -90,6 +93,13 @@ function render() {
   const end = ends[idx];
   document.getElementById("slider-label").textContent =
     `12 months ending ${end}`;
+  const [y, m] = end.split("-").map(Number);
+  const s = y * 12 + m - 1 - 11;
+  const start =
+    `${Math.floor(s / 12)}-${String((s % 12) + 1).padStart(2, "0")}`;
+  const badge = document.getElementById("window-badge");
+  badge.textContent = `data window: ${start} → ${end}`;
+  badge.hidden = false;
 
   for (const [jur, cfg] of Object.entries(JURS)) {
     const top = cfg.windows.top[end] ?? [];

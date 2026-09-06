@@ -45,7 +45,6 @@ jobs:
 
       - name: Fetch Petrinex data (incremental)
         run: |
-          uv run petrinex probe
           uv run petrinex fetch-vol
           uv run petrinex fetch-infra
 

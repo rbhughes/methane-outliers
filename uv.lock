@@ -236,7 +236,7 @@ wheels = [
 [[package]]
 name = "petrinex-etl"
 version = "0.1.0"
-source = { git = "https://github.com/rbhughes/petrinex-etl#a210d264912221a1461f1452fe59a26396997086" }
+source = { git = "https://github.com/rbhughes/petrinex-etl#a94767cd2d3d02cdfe2b3ce93df3f3d9e6cfddc0" }
 dependencies = [
     { name = "duckdb" },
     { name = "requests" },

@@ -22,9 +22,9 @@ jobs:
       RRC_RAW: ${{ github.workspace }}/rrc-data/raw
       RRC_OUT: ${{ github.workspace }}/rrc-data
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v5
+      - uses: astral-sh/setup-uv@v10
 
       - name: Install (with rrc-etl)
         run: uv sync --extra tx
@@ -66,7 +66,7 @@ jobs:
             --file /tmp/tw.gz --content-type application/json \
             --content-encoding gzip --remote
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
 

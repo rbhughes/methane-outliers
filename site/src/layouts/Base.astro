@@ -16,6 +16,8 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
       name="description"
       content="Peer-expectation outlier scores for vented, flared and fuel gas — Alberta facilities and Texas leases, from public regulatory data."
     />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet" />
   </head>
   <body data-data-base={DATA_BASE}>
     <nav class="topnav">
@@ -45,27 +47,28 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
      panels read as raised cards. Dot ramp is sequential red-orange
      (OrRd) on the light basemap. */
   :root {
-    --page: #eff1f6;
-    --surface: #fcfcfb;
-    --ink: #0b0b0b;
-    --ink-2: #52514e;
-    --muted: #898781;
-    --hairline: #dcdee8;
-    --border: rgba(11, 11, 11, 0.1);
+    --page: #f3f4f6;
+    --surface: #ffffff;
+    --ink: #262e42;
+    --ink-2: #5b6577;
+    --muted: #9aa0ab;
+    --hairline: #dfe1e6;
+    --border: rgba(38, 46, 66, 0.12);
     --seq-150: #fdd49e;
     --seq-300: #fc8d59;
     --seq-450: #ef6548;
     --seq-550: #d7301f;
     --seq-700: #990000;
-    --accent: #256abf;
-    --brand: #d95f00;
+    --accent: #4a6fa5;
+    --brand: #cc6137;
+    --gold: #eeb63f;
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     background: var(--page);
     color: var(--ink);
-    font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    font: 15px/1.6 Poppins, system-ui, -apple-system, "Segoe UI", sans-serif;
     display: flex;
     flex-direction: column;
     min-height: 100vh;

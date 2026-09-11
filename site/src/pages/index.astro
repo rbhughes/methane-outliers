@@ -171,16 +171,17 @@ import Base from "../layouts/Base.astro";
         the ratio, the outlier structure, and the trends are.
       </li>
     </ul>
-    <p class="muted">
-      Data: <a href="https://www.petrinex.ca">Petrinex</a> (Alberta,
-      refreshed weekly) and the Railroad Commission of Texas PDQ dump
-      plus public GIS well locations (monthly). Alberta facility
-      locations are DLS centroids (median ~270 m); Texas leases sit at
-      the median surface location of their wells. Contains information
-      licensed from Petrinex; data &copy; Government of Alberta.
-      Non-commercial demonstration; derived statistics only.
-    </p>
   </section>
+
+  <p slot="footer">
+    Data: <a href="https://www.petrinex.ca">Petrinex</a> (Alberta,
+    refreshed weekly) and the Railroad Commission of Texas PDQ dump
+    plus public GIS well locations (monthly). Alberta facility
+    locations are DLS centroids (median ~270 m); Texas leases sit at
+    the median surface location of their wells. Contains information
+    licensed from Petrinex; data &copy; Government of Alberta.
+    Non-commercial demonstration; derived statistics only.
+  </p>
 
   <script src="../scripts/main.js"></script>
 </Base>

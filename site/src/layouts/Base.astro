@@ -237,11 +237,14 @@ const DATA_BASE = import.meta.env.PUBLIC_DATA_BASE ?? "/data";
   .outliers .fac { font-weight: 600; }
   .outliers .sub { color: var(--muted); font-size: 0.76rem; display: block; }
   footer {
+    border-top: 1px solid var(--hairline);
+    background: var(--surface);
+    padding: 1rem 2.1rem 1.4rem;
+    text-align: center;
     color: var(--muted);
-    font-size: 0.78rem;
-    padding: 0.4rem 2.1rem 1rem;
+    font-size: 0.85rem;
   }
-  footer p { margin: 0.2rem 0; }
+  footer p { max-width: 68rem; margin: 0.35rem auto; }
   .maplibregl-popup-content {
     font: 13px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
     color: var(--ink);

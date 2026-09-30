@@ -7,3 +7,6 @@ site/dist/
 site/public/data/
 site/.astro/
 petrinex-data/
+
+# Wrangler local cache (account id, build state)
+.wrangler

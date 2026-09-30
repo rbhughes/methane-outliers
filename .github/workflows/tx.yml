@@ -27,7 +27,11 @@ jobs:
       - uses: astral-sh/setup-uv@v10.1.0
 
       - name: Install (with rrc-etl)
-        run: uv sync --extra tx
+        run: uv sync --extra tx --extra dev
+
+      # Fail before the ~3.7 GB download, not after it.
+      - name: Run tests
+        run: uv run pytest -q
 
       - name: Fetch PDQ dump (~3.7 GB)
         run: uv run rrc fetch-pdq

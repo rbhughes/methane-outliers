@@ -41,7 +41,11 @@ jobs:
           restore-keys: petrinex-data-
 
       - name: Install
-        run: uv sync
+        run: uv sync --extra dev
+
+      # Fail before the multi-hundred-MB fetch, not after it.
+      - name: Run tests
+        run: uv run pytest -q
 
       - name: Fetch Petrinex data (incremental)
         run: |

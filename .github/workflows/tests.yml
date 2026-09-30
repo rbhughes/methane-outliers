@@ -1,0 +1,33 @@
+# Unit tests, on every push and PR. Both suites score a tiny synthetic
+# layout in tmp_path, so this needs no Petrinex or RRC data and no
+# secrets -- it runs in about a minute. The ab/tx workflows run the same
+# suite as a gate before their multi-GB fetches, but those only fire on a
+# schedule and on narrow path filters; this is what covers ordinary
+# pushes and branches.
+name: tests
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v10.1.0
+
+      # pytest lives in the `dev` extra, which plain `uv sync` skips.
+      - name: Install (with dev extra)
+        run: uv sync --extra dev
+
+      - name: Run tests
+        run: uv run pytest -q

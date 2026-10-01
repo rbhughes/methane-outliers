@@ -1,7 +1,7 @@
 [project]
 name = "methane-outliers"
 version = "0.1.0"
-description = "Peer-expectation outlier scores for vented, flared and fuel gas at Alberta facilities"
+description = "Peer-expectation outlier scores for vented, flared and fuel gas at Alberta facilities and Texas leases"
 requires-python = ">=3.12"
 license = "MIT"
 license-files = ["LICENSE"]

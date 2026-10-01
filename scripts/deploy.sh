@@ -16,6 +16,13 @@ export PUBLIC_DATA_BASE="${PUBLIC_DATA_BASE:-https://pub-45d719103a704b39a9b1888
 npm --prefix site ci
 npm --prefix site run build
 
+# site/public/data/ is gitignored scratch from local ETL runs, and Astro
+# copies public/ into dist/ wholesale. The deployed site reads its data from
+# R2 at runtime and never touches these, but they are large enough that
+# wrangler rejects the upload (Pages caps a file at 25 MiB). CI never sees
+# this because a fresh checkout has no local data.
+rm -rf site/dist/data
+
 npx wrangler pages deploy site/dist \
   --project-name "$PROJECT" \
   --branch=main

@@ -294,7 +294,7 @@ wheels = [
 [[package]]
 name = "rrc-etl"
 version = "0.1.0"
-source = { git = "https://github.com/rbhughes/rrc-etl#9904bb54a354fb0423f2f571c9480757cea9838f" }
+source = { git = "https://github.com/rbhughes/rrc-etl#0a6555e7e26968c5b9c54400f019218d7814315a" }
 dependencies = [
     { name = "duckdb" },
     { name = "requests" },

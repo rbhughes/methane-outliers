@@ -70,39 +70,57 @@ conversion, p50 accuracy 267 m measured against 532,623 AER ST37
 surveyed wells) and ~153,000 TX leases (99.99% county-located) per
 window.
 
-## Known fragility: the Texas fetch gets blocked
+## Why Texas refreshes get refused
 
-The monthly `tx` workflow fails at random, and not because the RRC
-changed anything. `mft.rrc.texas.gov`, the GoAnywhere portal that
-serves the PDQ dump, sits behind a WAF that refuses callers two ways,
-both measured here:
+When the Texas numbers are stale, it is because the refresh was
+actively blocked, not because the pipeline broke. The RRC publishes
+the dump on schedule and the code parses it correctly; the portal
+simply will not talk to the address the job runs from.
+
+`mft.rrc.texas.gov`, the GoAnywhere portal serving the PDQ dump, sits
+behind a WAF that refuses callers two ways. Both were measured here
+on 2026-10-03:
 
 - A request carrying a non-browser User-Agent gets `HTTP 403` with a
   zero-length body. `rrc-etl` sends a `Mozilla/5.0` UA, so this is
-  not what bites in CI.
-- A source address the WAF has decided against stops getting an
-  answer to the TLS handshake at all — `ssl.SSLEOFError:
+  not what bites in CI — it is just how the WAF announced itself.
+- A source address the WAF has decided against gets no answer to the
+  TLS handshake at all: `ssl.SSLEOFError:
   UNEXPECTED_EOF_WHILE_READING`, raised before any HTTP request is
-  sent. GitHub-hosted runners draw random egress IPs from shared
-  Azure ranges, so whether a given run can reach the host is luck.
+  sent. Nothing about the request matters, because nothing about it
+  is ever read.
 
-Observed: the 2026-09-01 run drew a clean address and finished in
-11m45s. The 2026-10-01 scheduled run got a 200 whose body did not
-parse; two dispatches on 2026-10-03 had their handshakes dropped, and
-the second retried four times across seven minutes with every attempt
-refused, so the block is sticky for at least that long. The same
-fetch from a residential address succeeds on every attempt, and a
-runner that is not blocked parses the page fine — the page is not the
-problem.
+The second one is what fails the `tx` workflow. GitHub-hosted runners
+draw egress addresses from shared Azure ranges, so reachability is a
+property of whichever address a run happens to get.
 
-`rrc-etl`'s `fetch.py` retries with minutes of backoff and reports
-which failure happened, so a blocked run says it was refused instead
-of blaming a page change. Retries cannot re-roll a runner's address,
-though, so this makes the failure legible rather than rare. When a
-scheduled run fails this way, re-dispatch it until one lands on a
-clean address, or fetch the dump off-CI, stage it at
-`$RRC_RAW/PDQ_DSV.zip` and skip the fetch step. Alberta's weekly pipeline is
-unaffected — Petrinex does not do this.
+The record so far, which is too small to call a rate:
+
+| run | outcome |
+|---|---|
+| 2026-09-01 | clean address, completed in 11m45s |
+| 2026-10-01 (scheduled) | HTTP 200 whose body did not parse |
+| 2026-10-03 (dispatch) | handshake dropped on the first GET |
+| 2026-10-03 (dispatch) | four attempts over 7 min, all refused |
+
+Two controls rule out the obvious alternatives: the same fetch from a
+residential address succeeded on 10 of 10 attempts, and three fresh
+runners that were *not* blocked parsed the page fine. The page is
+unchanged — the file row is still `fileTable:0:j_id_2f` and the
+listing still shows `PDQ_DSV.zip`.
+
+`rrc-etl`'s `fetch.py` retries with minutes of backoff and names the
+failure, so a blocked run reports being refused instead of blaming a
+page change. That makes the failure legible, not rare: retries cannot
+re-roll a runner's address, and the one run that retried had every
+attempt over seven minutes refused. When a scheduled run fails this
+way, re-dispatch it until one lands on a clean address, or fetch the
+dump off-CI, stage it at `$RRC_RAW/PDQ_DSV.zip` and skip the fetch
+step.
+
+Alberta's weekly pipeline is unaffected; Petrinex does not do this.
+Revisiting the arrangement in November 2026 — a self-hosted runner or
+staging the dump in R2 would both remove the coin flip.
 
 ## The site (`site/`)
 

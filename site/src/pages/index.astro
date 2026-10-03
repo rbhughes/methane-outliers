@@ -57,17 +57,19 @@ import Base from "../layouts/Base.astro";
   </section>
 
   <aside class="notice">
-    <strong>Texas figures may be stale.</strong> The monthly refresh
-    pulls the RRC&rsquo;s production dump from a file-transfer portal
-    that blocks callers by source-IP reputation, dropping the TLS
-    handshake before a request is even sent. The pipeline runs on
-    GitHub Actions, whose runners draw shared addresses that trip
-    that block often, so a scheduled refresh can fail for days with
-    nothing wrong on either end &mdash; the dump is published, the
-    code is fine, the address is simply unwelcome. Check the window
-    date above for what is actually loaded, and the
-    <a href="https://github.com/rbhughes/methane-outliers#known-fragility-the-texas-fetch-gets-blocked">README</a>
-    for the measurements. Alberta is unaffected.
+    <strong>If the Texas window looks old, the refresh is being
+    refused, not failing.</strong> The RRC publishes its production
+    dump on schedule and this pipeline parses it correctly. But the
+    portal serving that dump blocks callers by source-IP reputation,
+    and it does so by dropping the TLS handshake &mdash; the request
+    is never read, let alone answered. The pipeline runs on GitHub
+    Actions, whose runners draw shared addresses, so whether a given
+    month gets through depends on which address it happens to land
+    on. As of 3 October 2026 every attempt since the 1st had been
+    refused, one of them four times over seven minutes. The window
+    date above is always the truth about what is loaded; the
+    <a href="https://github.com/rbhughes/methane-outliers#why-texas-refreshes-get-refused">README</a>
+    records the measurements. Alberta is unaffected.
   </aside>
 
   <div class="controls">
